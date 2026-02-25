@@ -2,9 +2,8 @@ import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
 export const authConfig = {
+    trustHost: true,
     providers: [
-        // We leave this empty or with basic settings for the middleware.
-        // The actual authorization logic will stay in the main auth file.
         Credentials({}),
     ],
     callbacks: {
