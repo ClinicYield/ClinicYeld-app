@@ -57,22 +57,16 @@ export function Sidebar() {
     };
 
     return (
-        <aside className="fixed left-0 top-0 h-full w-64 flex flex-col z-40"
-            style={{
-                background: "linear-gradient(180deg, #0d0f1a 0%, #0f1117 100%)",
-                borderRight: "1px solid rgba(99, 102, 241, 0.1)",
-            }}>
+        <aside className="fixed left-0 top-0 h-full w-64 flex flex-col z-40 bg-sidebar-bg border-r border-border">
 
             {/* Logo */}
-            <div className="h-16 flex items-center px-6 gap-3 shrink-0"
-                style={{ borderBottom: "1px solid rgba(99, 102, 241, 0.1)" }}>
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
+            <div className="h-16 flex items-center px-6 gap-3 shrink-0 border-b border-border">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-linear-to-br from-indigo-600 to-violet-600">
                     <Activity className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                    <span className="text-white font-bold text-sm">ClinicYield</span>
-                    <p className="text-xs" style={{ color: "#64748b" }}>v1.0</p>
+                    <span className="text-foreground font-bold text-sm">ClinicYield</span>
+                    <p className="text-xs text-muted">v1.0</p>
                 </div>
             </div>
 
@@ -80,8 +74,7 @@ export function Sidebar() {
             <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
                 {navItems.map((group) => (
                     <div key={group.group} className="mb-4">
-                        <p className="text-xs font-semibold uppercase tracking-wider px-3 mb-2"
-                            style={{ color: "#374151" }}>
+                        <p className="text-[10px] font-bold uppercase tracking-widest px-3 mb-2 text-muted">
                             {group.group}
                         </p>
                         {group.items.map((item) => {
@@ -93,17 +86,13 @@ export function Sidebar() {
                                     className={cn(
                                         "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group",
                                         active
-                                            ? "text-white"
-                                            : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                                            ? "text-indigo-600 bg-indigo-50 border border-indigo-100"
+                                            : "text-slate-600 hover:text-indigo-600 hover:bg-slate-100"
                                     )}
-                                    style={active ? {
-                                        background: "linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.1))",
-                                        border: "1px solid rgba(99, 102, 241, 0.3)",
-                                    } : {}}
                                 >
-                                    <item.icon className={cn("w-4 h-4 shrink-0", active ? "text-indigo-400" : "text-slate-500 group-hover:text-slate-300")} />
+                                    <item.icon className={cn("w-4 h-4 shrink-0", active ? "text-indigo-600" : "text-slate-400 group-hover:text-indigo-600")} />
                                     <span className="flex-1">{item.label}</span>
-                                    {active && <ChevronRight className="w-3 h-3 text-indigo-400" />}
+                                    {active && <ChevronRight className="w-3 h-3 text-indigo-600" />}
                                 </Link>
                             );
                         })}
@@ -112,15 +101,15 @@ export function Sidebar() {
             </nav>
 
             {/* Footer */}
-            <div className="p-3 shrink-0" style={{ borderTop: "1px solid rgba(99, 102, 241, 0.1)" }}>
+            <div className="p-3 shrink-0 border-t border-border">
                 <Link href="/settings"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-all mb-1">
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition-all mb-1">
                     <Settings className="w-4 h-4" />
                     <span>Impostazioni</span>
                 </Link>
                 <button
                     onClick={() => signOut({ callbackUrl: "/login" })}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-600 hover:text-red-600 hover:bg-red-50 transition-all">
                     <LogOut className="w-4 h-4" />
                     <span>Esci</span>
                 </button>
@@ -128,3 +117,4 @@ export function Sidebar() {
         </aside>
     );
 }
+

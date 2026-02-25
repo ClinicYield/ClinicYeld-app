@@ -8,7 +8,7 @@ export default function DashboardLayout({
 }) {
     return (
         <SessionProvider>
-            <div className="flex h-screen overflow-hidden" style={{ background: "#0f1117" }}>
+            <div className="flex h-screen overflow-hidden bg-background">
                 <Sidebar />
                 <main className="flex-1 flex flex-col overflow-hidden ml-64">
                     <div className="flex-1 overflow-y-auto">
@@ -17,5 +17,6 @@ export default function DashboardLayout({
                 </main>
             </div>
         </SessionProvider>
+
     );
 }

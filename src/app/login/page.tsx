@@ -4,6 +4,8 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Activity, Lock, Mail, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
+
 
 export default function LoginPage() {
     const router = useRouter();
@@ -39,41 +41,33 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center relative overflow-hidden"
-            style={{ background: "linear-gradient(135deg, #0f1117 0%, #0d0f1a 50%, #12101f 100%)" }}>
+        <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-slate-50">
 
             {/* Background decorativo */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl" />
-                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-500/3 rounded-full blur-3xl" />
+                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl opacity-50" />
+                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl opacity-50" />
             </div>
 
             {/* Grid pattern */}
-            <div className="absolute inset-0 opacity-[0.03]"
+            <div className="absolute inset-0 opacity-[0.05]"
                 style={{
                     backgroundImage: "linear-gradient(#6366f1 1px, transparent 1px), linear-gradient(90deg, #6366f1 1px, transparent 1px)",
-                    backgroundSize: "50px 50px"
+                    backgroundSize: "64px 64px"
                 }}
             />
 
             <div className="relative w-full max-w-md px-6 animate-fade-in">
                 {/* Card principale */}
-                <div className="rounded-2xl p-8 border"
-                    style={{
-                        background: "rgba(26, 29, 46, 0.9)",
-                        borderColor: "rgba(99, 102, 241, 0.2)",
-                        boxShadow: "0 24px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(99, 102, 241, 0.05)"
-                    }}>
+                <div className="rounded-2xl p-8 bg-white border border-slate-200 shadow-xl shadow-indigo-100/50">
 
                     {/* Logo */}
                     <div className="text-center mb-8">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
-                            style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 bg-linear-to-br from-indigo-600 to-violet-600 shadow-lg shadow-indigo-200">
                             <Activity className="w-8 h-8 text-white" />
                         </div>
-                        <h1 className="text-2xl font-bold text-white mb-1">ClinicYield</h1>
-                        <p className="text-sm" style={{ color: "#64748b" }}>
+                        <h1 className="text-2xl font-bold text-slate-900 mb-1">ClinicYield</h1>
+                        <p className="text-sm text-slate-500">
                             Gestione finanziaria poliambulatorio
                         </p>
                     </div>
@@ -82,50 +76,41 @@ export default function LoginPage() {
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {/* Email */}
                         <div>
-                            <label className="block text-sm font-medium mb-2" style={{ color: "#94a3b8" }}>
+                            <label className="block text-sm font-semibold mb-2 text-slate-700">
                                 Email
                             </label>
                             <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "#64748b" }} />
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                 <input
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="admin@clinicyield.it"
                                     required
-                                    className="w-full pl-10 pr-4 py-3 rounded-xl text-sm text-white placeholder-slate-600 outline-none transition-all focus:ring-2"
-                                    style={{
-                                        background: "rgba(15, 17, 23, 0.8)",
-                                        border: "1px solid rgba(99, 102, 241, 0.2)",
-                                    }}
+                                    className="w-full pl-10 pr-4 py-3 rounded-xl text-sm text-slate-900 placeholder-slate-400 border border-slate-200 bg-slate-50/50 outline-none transition-all focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white"
                                 />
                             </div>
                         </div>
 
                         {/* Password */}
                         <div>
-                            <label className="block text-sm font-medium mb-2" style={{ color: "#94a3b8" }}>
+                            <label className="block text-sm font-semibold mb-2 text-slate-700">
                                 Password
                             </label>
                             <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "#64748b" }} />
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
                                     required
-                                    className="w-full pl-10 pr-12 py-3 rounded-xl text-sm text-white placeholder-slate-600 outline-none transition-all"
-                                    style={{
-                                        background: "rgba(15, 17, 23, 0.8)",
-                                        border: "1px solid rgba(99, 102, 241, 0.2)",
-                                    }}
+                                    className="w-full pl-10 pr-12 py-3 rounded-xl text-sm text-slate-900 placeholder-slate-400 border border-slate-200 bg-slate-50/50 outline-none transition-all focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md transition-colors hover:text-white"
-                                    style={{ color: "#64748b" }}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md text-slate-400 hover:text-slate-600 transition-colors"
                                 >
                                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
@@ -134,10 +119,9 @@ export default function LoginPage() {
 
                         {/* Error */}
                         {error && (
-                            <div className="flex items-center gap-2 p-3 rounded-xl"
-                                style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.3)" }}>
-                                <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-                                <p className="text-sm text-red-400">{error}</p>
+                            <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-100">
+                                <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                                <p className="text-sm text-red-600 font-medium">{error}</p>
                             </div>
                         )}
 
@@ -145,13 +129,12 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3 px-4 rounded-xl text-white font-semibold text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                            style={{
-                                background: loading
-                                    ? "rgba(99, 102, 241, 0.5)"
-                                    : "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                                boxShadow: loading ? "none" : "0 4px 20px rgba(99, 102, 241, 0.4)",
-                            }}
+                            className={cn(
+                                "w-full py-3 px-4 rounded-xl text-white font-bold text-sm transition-all duration-200 shadow-lg",
+                                loading
+                                    ? "bg-indigo-400 cursor-not-allowed"
+                                    : "bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 shadow-indigo-200 active:scale-[0.98]"
+                            )}
                         >
                             {loading ? (
                                 <span className="flex items-center justify-center gap-2">
@@ -166,19 +149,19 @@ export default function LoginPage() {
                     </form>
 
                     {/* Demo credentials */}
-                    <div className="mt-6 p-3 rounded-xl text-center"
-                        style={{ background: "rgba(99, 102, 241, 0.05)", border: "1px solid rgba(99, 102, 241, 0.1)" }}>
-                        <p className="text-xs" style={{ color: "#64748b" }}>
-                            Demo: <span className="text-indigo-400">admin@clinicyield.it</span> / <span className="text-indigo-400">Admin123!</span>
+                    <div className="mt-6 p-4 rounded-xl bg-slate-50 border border-slate-100 text-center">
+                        <p className="text-xs text-slate-500">
+                            Demo: <span className="font-semibold text-indigo-600">admin@clinicyield.it</span> / <span className="font-semibold text-indigo-600">Admin123!</span>
                         </p>
                     </div>
                 </div>
 
                 {/* Footer */}
-                <p className="text-center text-xs mt-6" style={{ color: "#374151" }}>
+                <p className="text-center text-xs mt-8 text-slate-400">
                     © 2026 ClinicYield · Sistema di gestione finanziaria sanitaria
                 </p>
             </div>
         </div>
     );
 }
+
