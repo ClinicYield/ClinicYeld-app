@@ -56,7 +56,14 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const data = medicoSchema.parse(body);
+
+        // Clean empty strings to null for optional fields
+        const cleaned: any = {};
+        for (const [k, v] of Object.entries(body)) {
+            cleaned[k] = v === "" ? null : v;
+        }
+
+        const data = medicoSchema.parse(cleaned);
 
         const [medico] = await db.insert(medici).values({
             ...data,
@@ -68,11 +75,14 @@ export async function POST(req: NextRequest) {
         }).returning();
 
         return NextResponse.json(medico, { status: 201 });
-    } catch (error) {
+    } catch (error: any) {
         if (error instanceof z.ZodError) {
             return NextResponse.json({ error: error.issues }, { status: 422 });
         }
-        console.error(error);
-        return NextResponse.json({ error: "Errore" }, { status: 500 });
+        console.error("POST Doctor error:", error);
+        const errorMessage = error.code === '23505'
+            ? "Medico già esistente (Codice Fiscale duplicato)"
+            : (error.message || "Errore durante il salvataggio");
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 }

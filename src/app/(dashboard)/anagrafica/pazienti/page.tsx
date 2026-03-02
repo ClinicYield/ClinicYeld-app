@@ -214,22 +214,23 @@ function NuovoPazienteModal({ onClose, onSave }: { onClose: () => void; onSave: 
         setLoading(true);
         setError("");
         try {
+            // Pre-process form: all empty strings become null
+            const cleaned: any = {};
+            for (const [k, v] of Object.entries(form)) {
+                cleaned[k] = v === "" ? null : v;
+            }
+
             const res = await fetch("/api/anagrafica/pazienti", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    ...form,
-                    sesso: form.sesso || null,
-                    assicurazioneId: form.assicurazioneId || null,
-                    aziendaId: form.aziendaId || null
-                }),
+                body: JSON.stringify(cleaned),
             });
             if (!res.ok) {
                 const errData = await res.json();
-                const message = Array.isArray(errData.error)
-                    ? errData.error[0]?.message
-                    : (errData.error || "Errore nel salvataggio");
-                throw new Error(message);
+                const firstError = Array.isArray(errData.error)
+                    ? errData.error[0]?.message || errData.error[0]?.code
+                    : errData.error;
+                throw new Error(firstError || "Errore sconosciuto");
             }
             onSave();
         } catch (e: any) {
@@ -290,32 +291,34 @@ function NuovoPazienteModal({ onClose, onSave }: { onClose: () => void; onSave: 
                             </select>
                         </div>
 
-                        <div className="col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 bg-slate-900/40 p-5 rounded-2xl border border-white/5 my-2">
                             <div>
-                                <div className="flex items-center justify-between mb-1.5">
-                                    <label className="block text-xs text-slate-400">Assicurazione</label>
-                                    <button type="button" onClick={() => setShowAssicurazioneForm(true)} className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-0.5">
-                                        <Plus className="w-2.5 h-2.5" /> Aggiungi
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Assicurazione</label>
+                                    <button type="button" onClick={() => setShowAssicurazioneForm(true)}
+                                        className="text-[10px] bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded-lg border border-indigo-500/20 transition-all font-bold uppercase tracking-wide">
+                                        + Crea Nuova
                                     </button>
                                 </div>
                                 <select value={form.assicurazioneId} onChange={e => setForm(f => ({ ...f, assicurazioneId: e.target.value }))}
-                                    className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
-                                    style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }}>
-                                    <option value="">Nessuna</option>
+                                    className="w-full px-3 py-2.5 rounded-xl text-sm text-white outline-none"
+                                    style={{ background: "#1a1d2e", border: "1px solid rgba(99,102,241,0.2)" }}>
+                                    <option value="">Nessuna assicurazione</option>
                                     {assicurazioni.map(a => <option key={a.id} value={a.id}>{a.ragioneSociale}</option>)}
                                 </select>
                             </div>
                             <div>
-                                <div className="flex items-center justify-between mb-1.5">
-                                    <label className="block text-xs text-slate-400">Azienda Conv.</label>
-                                    <button type="button" onClick={() => setShowAziendaForm(true)} className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-0.5">
-                                        <Plus className="w-2.5 h-2.5" /> Aggiungi
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Azienda Conv.</label>
+                                    <button type="button" onClick={() => setShowAziendaForm(true)}
+                                        className="text-[10px] bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded-lg border border-indigo-500/20 transition-all font-bold uppercase tracking-wide">
+                                        + Crea Nuova
                                     </button>
                                 </div>
                                 <select value={form.aziendaId} onChange={e => setForm(f => ({ ...f, aziendaId: e.target.value }))}
-                                    className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
-                                    style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }}>
-                                    <option value="">Nessuna</option>
+                                    className="w-full px-3 py-2.5 rounded-xl text-sm text-white outline-none"
+                                    style={{ background: "#1a1d2e", border: "1px solid rgba(99,102,241,0.2)" }}>
+                                    <option value="">Nessuna azienda</option>
                                     {aziende.map(a => <option key={a.id} value={a.id}>{a.ragioneSociale}</option>)}
                                 </select>
                             </div>

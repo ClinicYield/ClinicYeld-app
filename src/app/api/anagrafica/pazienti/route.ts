@@ -54,28 +54,40 @@ export async function GET(req: NextRequest) {
         });
 
         return NextResponse.json({ data: result, page, limit });
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: "Errore" }, { status: 500 });
+    } catch (error: any) {
+        console.error("GET Patients error:", error);
+        return NextResponse.json({ error: error.message || "Errore nel caricamento" }, { status: 500 });
     }
 }
 
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const data = pazienteSchema.parse(body);
+
+        // Clean empty strings to null for all optional fields
+        const cleaned: any = {};
+        for (const [k, v] of Object.entries(body)) {
+            cleaned[k] = v === "" ? null : v;
+        }
+
+        const data = pazienteSchema.parse(cleaned);
 
         const [paziente] = await db.insert(pazienti).values({
             ...data,
+            // Ensure email isn't an empty string if it passed Zod or was cleaned
             email: data.email || null,
         }).returning();
 
         return NextResponse.json(paziente, { status: 201 });
-    } catch (error) {
+    } catch (error: any) {
         if (error instanceof z.ZodError) {
             return NextResponse.json({ error: error.issues }, { status: 422 });
         }
-        console.error(error);
-        return NextResponse.json({ error: "Errore" }, { status: 500 });
+        console.error("POST Patient error:", error);
+        // Handle common DB errors (like unique constraint)
+        const errorMessage = error.code === '23505'
+            ? "Paziente già esistente (Codice Fiscale duplicato)"
+            : (error.message || "Errore durante il salvataggio");
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 }
