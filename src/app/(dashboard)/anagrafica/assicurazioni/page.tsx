@@ -125,14 +125,16 @@ export default function AssicurazioniAnagrafica() {
             </div>
 
             {showForm && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-                    <NuovaAssicurazioneModal
-                        onClose={() => setShowForm(false)}
-                        onSave={() => {
-                            setShowForm(false);
-                            fetchData();
-                        }}
-                    />
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => setShowForm(false)}>
+                    <div className="w-full max-w-md" onClick={e => e.stopPropagation()}>
+                        <NuovaAssicurazioneModal
+                            onClose={() => setShowForm(false)}
+                            onSave={() => {
+                                setShowForm(false);
+                                fetchData();
+                            }}
+                        />
+                    </div>
                 </div>
             )}
         </div>
@@ -155,7 +157,10 @@ function NuovaAssicurazioneModal({ onClose, onSave }: { onClose: () => void; onS
                 body: JSON.stringify(form)
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(Array.isArray(data.error) ? data.error[0].message : (data.error || "Errore"));
+            if (!res.ok) {
+                const msg = Array.isArray(data.error) ? data.error[0].message : (data.error || "Errore");
+                throw new Error(msg);
+            }
             onSave();
         } catch (e: any) {
             setError(e.message);
@@ -165,34 +170,36 @@ function NuovaAssicurazioneModal({ onClose, onSave }: { onClose: () => void; onS
     };
 
     return (
-        <div className="w-full max-w-md bg-[#1a1d2e] rounded-3xl p-8 border border-white/10 shadow-2xl animate-scale-in">
+        <div className="bg-[#1a1d2e] rounded-3xl p-8 border border-white/10 shadow-2xl animate-scale-in">
             <h2 className="text-xl font-bold text-white mb-6">Nuova Convenzione</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                    <label className="block text-xs text-slate-400 mb-1.5 uppercase font-bold">Ragione Sociale *</label>
-                    <input type="text" value={form.ragioneSociale} onChange={e => setForm(f => ({ ...f, ragioneSociale: e.target.value }))} required
-                        className="w-full px-4 py-2.5 rounded-xl text-sm bg-slate-900/50 border border-white/10 text-white outline-none focus:border-indigo-500/50 transition-all font-inter" />
+                    <label className="block text-xs text-slate-400 mb-1.5 uppercase font-bold tracking-wider">Ragione Sociale *</label>
+                    <input type="text" value={form.ragioneSociale} onChange={e => setForm(f => ({ ...f, ragioneSociale: e.target.value }))} required placeholder="Es. Unisalute"
+                        className="w-full px-4 py-3 rounded-xl text-sm bg-slate-900 border border-white/10 text-white outline-none focus:border-indigo-500/50 transition-all" />
                 </div>
                 <div>
-                    <label className="block text-xs text-slate-400 mb-1.5 uppercase font-bold">Partita IVA * (11 cifre)</label>
-                    <input type="text" value={form.partitaIva} onChange={e => setForm(f => ({ ...f, partitaIva: e.target.value }))} required maxLength={11} minLength={11}
-                        className="w-full px-4 py-2.5 rounded-xl text-sm bg-slate-900/50 border border-white/10 text-white outline-none focus:border-indigo-500/50 transition-all font-inter" />
+                    <label className="block text-xs text-slate-400 mb-1.5 uppercase font-bold tracking-wider">Partita IVA * (11 cifre)</label>
+                    <input type="text" value={form.partitaIva} onChange={e => setForm(f => ({ ...f, partitaIva: e.target.value }))} required maxLength={11} minLength={11} placeholder="01234567890"
+                        className="w-full px-4 py-3 rounded-xl text-sm bg-slate-900 border border-white/10 text-white outline-none focus:border-indigo-500/50 transition-all" />
                 </div>
-                <div>
-                    <label className="block text-xs text-slate-400 mb-1.5 uppercase font-bold">Email</label>
-                    <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                        className="w-full px-4 py-2.5 rounded-xl text-sm bg-slate-900/50 border border-white/10 text-white outline-none focus:border-indigo-500/50 transition-all font-inter" />
-                </div>
-                <div>
-                    <label className="block text-xs text-slate-400 mb-1.5 uppercase font-bold">Telefono</label>
-                    <input type="text" value={form.telefono} onChange={e => setForm(f => ({ ...f, telefono: e.target.value }))}
-                        className="w-full px-4 py-2.5 rounded-xl text-sm bg-slate-900/50 border border-white/10 text-white outline-none focus:border-indigo-500/50 transition-all font-inter" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-xs text-slate-400 mb-1.5 uppercase font-bold tracking-wider">Email</label>
+                        <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="info@esempio.it"
+                            className="w-full px-4 py-3 rounded-xl text-sm bg-slate-900 border border-white/10 text-white outline-none focus:border-indigo-500/50 transition-all" />
+                    </div>
+                    <div>
+                        <label className="block text-xs text-slate-400 mb-1.5 uppercase font-bold tracking-wider">Telefono</label>
+                        <input type="text" value={form.telefono} onChange={e => setForm(f => ({ ...f, telefono: e.target.value }))} placeholder="02 1234567"
+                            className="w-full px-4 py-3 rounded-xl text-sm bg-slate-900 border border-white/10 text-white outline-none focus:border-indigo-500/50 transition-all" />
+                    </div>
                 </div>
                 {error && <p className="text-xs text-red-400 bg-red-400/10 p-3 rounded-xl border border-red-400/20">{error}</p>}
-                <div className="flex justify-end gap-3 pt-4">
-                    <button type="button" onClick={onClose} className="text-sm text-slate-400 px-4 py-2 hover:text-white">Annulla</button>
-                    <button type="submit" disabled={loading} className="px-6 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/20 disabled:opacity-50">
-                        {loading ? "Fatto..." : "Crea Convenzione"}
+                <div className="flex justify-end gap-3 pt-6 border-t border-white/5">
+                    <button type="button" onClick={onClose} className="text-sm font-medium text-slate-400 px-4 py-2 hover:text-white transition-colors">Annulla</button>
+                    <button type="submit" disabled={loading} className="px-6 py-3 rounded-xl text-sm font-bold text-white shadow-lg bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/20 disabled:opacity-50 transition-all active:scale-95">
+                        {loading ? "Salvataggio..." : "Crea Convenzione"}
                     </button>
                 </div>
             </form>

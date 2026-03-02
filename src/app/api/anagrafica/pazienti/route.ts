@@ -23,12 +23,25 @@ const pazienteSchema = z.object({
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
     const search = searchParams.get("search");
     const page = Number(searchParams.get("page") ?? 1);
     const limit = Number(searchParams.get("limit") ?? 50);
     const offset = (page - 1) * limit;
 
     try {
+        // Handle single patient fetch
+        if (id) {
+            const result = await db.query.pazienti.findFirst({
+                where: eq(pazienti.id, id),
+                with: {
+                    assicurazione: { columns: { ragioneSociale: true } },
+                    azienda: { columns: { ragioneSociale: true } },
+                },
+            });
+            return NextResponse.json({ data: result });
+        }
+
         const conditions = [eq(pazienti.attivo, true)];
 
         if (search) {
