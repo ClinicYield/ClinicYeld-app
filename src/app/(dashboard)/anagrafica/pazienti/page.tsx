@@ -192,8 +192,10 @@ function NuovoPazienteModal({ onClose, onSave }: { onClose: () => void; onSave: 
     const [aziende, setAziende] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [showAssicurazioneForm, setShowAssicurazioneForm] = useState(false);
+    const [showAziendaForm, setShowAziendaForm] = useState(false);
 
-    useEffect(() => {
+    const refreshData = () => {
         Promise.all([
             fetch("/api/anagrafica/assicurazioni").then(r => r.json()),
             fetch("/api/anagrafica/aziende").then(r => r.json())
@@ -201,6 +203,10 @@ function NuovoPazienteModal({ onClose, onSave }: { onClose: () => void; onSave: 
             setAssicurazioni(ass.data ?? []);
             setAziende(az.data ?? []);
         });
+    };
+
+    useEffect(() => {
+        refreshData();
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -220,7 +226,6 @@ function NuovoPazienteModal({ onClose, onSave }: { onClose: () => void; onSave: 
             });
             if (!res.ok) {
                 const errData = await res.json();
-                // If it's a Zod error array, take the first one
                 const message = Array.isArray(errData.error)
                     ? errData.error[0]?.message
                     : (errData.error || "Errore nel salvataggio");
@@ -258,7 +263,7 @@ function NuovoPazienteModal({ onClose, onSave }: { onClose: () => void; onSave: 
                             { label: "Indirizzo", key: "indirizzo", col: 2 },
                             { label: "CAP", key: "cap" },
                             { label: "Città", key: "citta" },
-                            { label: "Provincia", key: "provincia" },
+                            { label: "Provincia (es. MI)", key: "provincia" },
                         ].map(({ label, key, type = "text", col }) => (
                             <div key={key} className={col === 2 ? "col-span-2" : ""}>
                                 <label className="block text-xs text-slate-400 mb-1.5">{label}</label>
@@ -287,7 +292,12 @@ function NuovoPazienteModal({ onClose, onSave }: { onClose: () => void; onSave: 
 
                         <div className="col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs text-slate-400 mb-1.5">Assicurazione</label>
+                                <div className="flex items-center justify-between mb-1.5">
+                                    <label className="block text-xs text-slate-400">Assicurazione</label>
+                                    <button type="button" onClick={() => setShowAssicurazioneForm(true)} className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-0.5">
+                                        <Plus className="w-2.5 h-2.5" /> Aggiungi
+                                    </button>
+                                </div>
                                 <select value={form.assicurazioneId} onChange={e => setForm(f => ({ ...f, assicurazioneId: e.target.value }))}
                                     className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
                                     style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }}>
@@ -296,7 +306,12 @@ function NuovoPazienteModal({ onClose, onSave }: { onClose: () => void; onSave: 
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-xs text-slate-400 mb-1.5">Azienda Conv.</label>
+                                <div className="flex items-center justify-between mb-1.5">
+                                    <label className="block text-xs text-slate-400">Azienda Conv.</label>
+                                    <button type="button" onClick={() => setShowAziendaForm(true)} className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-0.5">
+                                        <Plus className="w-2.5 h-2.5" /> Aggiungi
+                                    </button>
+                                </div>
                                 <select value={form.aziendaId} onChange={e => setForm(f => ({ ...f, aziendaId: e.target.value }))}
                                     className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
                                     style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }}>
@@ -335,6 +350,86 @@ function NuovoPazienteModal({ onClose, onSave }: { onClose: () => void; onSave: 
                         </div>
                     </form>
                 </div>
+            </div>
+
+            {showAssicurazioneForm && (
+                <QuickAddModal
+                    title="Nuova Assicurazione"
+                    onClose={() => setShowAssicurazioneForm(false)}
+                    onSave={(id) => {
+                        refreshData();
+                        setForm(f => ({ ...f, assicurazioneId: id }));
+                        setShowAssicurazioneForm(false);
+                    }}
+                    api="/api/anagrafica/assicurazioni"
+                />
+            )}
+
+            {showAziendaForm && (
+                <QuickAddModal
+                    title="Nuova Azienda"
+                    onClose={() => setShowAziendaForm(false)}
+                    onSave={(id) => {
+                        refreshData();
+                        setForm(f => ({ ...f, aziendaId: id }));
+                        setShowAziendaForm(false);
+                    }}
+                    api="/api/anagrafica/aziende"
+                />
+            )}
+        </div>
+    );
+}
+
+function QuickAddModal({ title, onClose, onSave, api }: { title: string; onClose: () => void; onSave: (id: string) => void; api: string }) {
+    const [name, setName] = useState("");
+    const [piva, setPiva] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    const handleSave = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError("");
+        try {
+            const res = await fetch(api, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ragioneSociale: name, partitaIva: piva }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(Array.isArray(data.error) ? data.error[0].message : data.error);
+            onSave(data.id);
+        } catch (e: any) {
+            setError(e.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+            <div className="w-full max-w-sm rounded-2xl p-6" style={{ background: "#1a1d2e", border: "1px solid rgba(99,102,241,0.3)" }}>
+                <h3 className="text-lg font-bold text-white mb-4">{title}</h3>
+                <form onSubmit={handleSave} className="space-y-4">
+                    <div>
+                        <label className="block text-xs text-slate-400 mb-1">Ragione Sociale *</label>
+                        <input type="text" value={name} onChange={e => setName(e.target.value)} required
+                            className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none bg-slate-900/50 border border-white/10" />
+                    </div>
+                    <div>
+                        <label className="block text-xs text-slate-400 mb-1">Partita IVA * (11 cifre)</label>
+                        <input type="text" value={piva} onChange={e => setPiva(e.target.value)} required
+                            className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none bg-slate-900/50 border border-white/10" />
+                    </div>
+                    {error && <p className="text-xs text-red-400">{error}</p>}
+                    <div className="flex justify-end gap-2 pt-2">
+                        <button type="button" onClick={onClose} className="text-xs text-slate-400 px-3 py-2">Annulla</button>
+                        <button type="submit" disabled={loading} className="bg-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-lg disabled:opacity-50">
+                            {loading ? "..." : "Salva"}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );

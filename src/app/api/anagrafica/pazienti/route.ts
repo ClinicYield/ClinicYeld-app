@@ -13,7 +13,7 @@ const pazienteSchema = z.object({
     indirizzo: z.string().optional().nullable(),
     cap: z.string().max(10).optional().nullable(),
     citta: z.string().max(100).optional().nullable(),
-    provincia: z.string().max(2).optional().nullable(),
+    provincia: z.string().max(100).optional().nullable(),
     telefono: z.string().max(20).optional().nullable(),
     email: z.string().email().optional().nullable().or(z.literal("")),
     assicurazioneId: z.string().uuid().optional().nullable(),
