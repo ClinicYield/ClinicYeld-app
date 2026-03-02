@@ -190,130 +190,139 @@ function NuovoMedicoModal({ onClose, onSave }: { onClose: () => void; onSave: ()
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
-            <div className="w-full max-w-2xl rounded-2xl p-6 animate-fade-in overflow-y-auto max-h-[90vh]"
-                style={{ background: "#1a1d2e", border: "1px solid rgba(99,102,241,0.2)" }}>
-                <h2 className="text-lg font-semibold text-white mb-5">Nuovo Medico</h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
-                        {[
-                            { label: "Codice Fiscale *", key: "codiceFiscale" },
-                            { label: "Partita IVA", key: "partitaIva" },
-                            { label: "Nome *", key: "nome" },
-                            { label: "Cognome *", key: "cognome" },
-                            { label: "Telefono", key: "telefono" },
-                            { label: "Email", key: "email", type: "email" },
-                            { label: "IBAN", key: "iban", col: 2 },
-                        ].map(({ label, key, type = "text", col }) => (
-                            <div key={key} className={col === 2 ? "sm:col-span-2" : ""}>
-                                <label className="block text-xs text-slate-400 mb-1">{label}</label>
-                                <input type={type} value={(form as any)[key]}
-                                    onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                                    required={label.endsWith("*")}
-                                    className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
-                                    style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }} />
-                            </div>
-                        ))}
-                        <div className="sm:col-span-2">
-                            <label className="block text-xs text-slate-400 mb-1">Specializzazione</label>
-                            <select value={form.specialitaId} onChange={e => setForm(f => ({ ...f, specialitaId: e.target.value }))}
-                                className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
-                                style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }}>
-                                <option value="">Nessuna</option>
-                                {specialta.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
-                            </select>
-                        </div>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm p-4" onClick={onClose}>
+            <div className="flex min-h-full items-center justify-center" onClick={e => e.stopPropagation()}>
+                <div className="w-full max-w-2xl rounded-3xl p-6 sm:p-8 animate-fade-in"
+                    style={{ background: "#1a1d2e", border: "1px solid rgba(99,102,241,0.2)", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-xl font-bold text-white">Nuovo Medico</h2>
+                        <button onClick={onClose} className="p-2 rounded-full hover:bg-white/5 text-slate-400 transition-colors">
+                            <Plus className="w-5 h-5 rotate-45" />
+                        </button>
                     </div>
 
-                    {/* Modello compenso */}
-                    <div>
-                        <label className="block text-xs text-slate-400 mb-2">Modello Compenso *</label>
-                        <div className="grid grid-cols-3 gap-2">
+                    <form onSubmit={handleSubmit} className="space-y-6">
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
                             {[
-                                { val: "percentuale", label: "Percentuale", icon: Percent },
-                                { val: "affitto_stanza", label: "Affitto Stanza", icon: Home },
-                                { val: "misto", label: "Misto", icon: Layers },
-                            ].map(({ val, label, icon: Icon }) => (
-                                <button key={val} type="button"
-                                    onClick={() => setForm(f => ({ ...f, modelloCompenso: val }))}
-                                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-all"
-                                    style={{
-                                        background: form.modelloCompenso === val ? "rgba(99,102,241,0.2)" : "rgba(15,17,23,0.5)",
-                                        border: form.modelloCompenso === val ? "1px solid rgba(99,102,241,0.5)" : "1px solid rgba(99,102,241,0.1)",
-                                        color: form.modelloCompenso === val ? "#a5b4fc" : "#64748b"
-                                    }}>
-                                    <Icon className="w-4 h-4" />{label}
-                                </button>
+                                { label: "Codice Fiscale *", key: "codiceFiscale" },
+                                { label: "Partita IVA", key: "partitaIva" },
+                                { label: "Nome *", key: "nome" },
+                                { label: "Cognome *", key: "cognome" },
+                                { label: "Telefono", key: "telefono" },
+                                { label: "Email", key: "email", type: "email" },
+                                { label: "IBAN", key: "iban", col: 2 },
+                            ].map(({ label, key, type = "text", col }) => (
+                                <div key={key} className={col === 2 ? "sm:col-span-2" : ""}>
+                                    <label className="block text-xs text-slate-400 mb-1">{label}</label>
+                                    <input type={type} value={(form as any)[key]}
+                                        onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+                                        required={label.endsWith("*")}
+                                        className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
+                                        style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }} />
+                                </div>
                             ))}
+                            <div className="sm:col-span-2">
+                                <label className="block text-xs text-slate-400 mb-1">Specializzazione</label>
+                                <select value={form.specialitaId} onChange={e => setForm(f => ({ ...f, specialitaId: e.target.value }))}
+                                    className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
+                                    style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }}>
+                                    <option value="">Nessuna</option>
+                                    {specialta.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
+                                </select>
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Parametri compenso */}
-                    <div className="grid grid-cols-2 gap-4">
-                        {form.modelloCompenso === "percentuale" && (
-                            <div className="col-span-2">
-                                <label className="block text-xs text-slate-400 mb-1.5">Percentuale (%) *</label>
-                                <input type="number" step="0.01" min="0" max="100"
-                                    value={form.percentuale} onChange={e => setForm(f => ({ ...f, percentuale: e.target.value }))}
-                                    className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
-                                    style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }} />
+                        {/* Modello compenso */}
+                        <div>
+                            <label className="block text-xs text-slate-400 mb-2">Modello Compenso *</label>
+                            <div className="grid grid-cols-3 gap-2">
+                                {[
+                                    { val: "percentuale", label: "Percentuale", icon: Percent },
+                                    { val: "affitto_stanza", label: "Affitto Stanza", icon: Home },
+                                    { val: "misto", label: "Misto", icon: Layers },
+                                ].map(({ val, label, icon: Icon }) => (
+                                    <button key={val} type="button"
+                                        onClick={() => setForm(f => ({ ...f, modelloCompenso: val }))}
+                                        className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-all"
+                                        style={{
+                                            background: form.modelloCompenso === val ? "rgba(99,102,241,0.2)" : "rgba(15,17,23,0.5)",
+                                            border: form.modelloCompenso === val ? "1px solid rgba(99,102,241,0.5)" : "1px solid rgba(99,102,241,0.1)",
+                                            color: form.modelloCompenso === val ? "#a5b4fc" : "#64748b"
+                                        }}>
+                                        <Icon className="w-4 h-4" />{label}
+                                    </button>
+                                ))}
                             </div>
-                        )}
-                        {form.modelloCompenso === "affitto_stanza" && (
-                            <div className="col-span-2">
-                                <label className="block text-xs text-slate-400 mb-1.5">Affitto Fisso Mensile (€) *</label>
-                                <input type="number" step="0.01" min="0"
-                                    value={form.affittoFisso} onChange={e => setForm(f => ({ ...f, affittoFisso: e.target.value }))}
-                                    className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
-                                    style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }} />
-                            </div>
-                        )}
-                        {form.modelloCompenso === "misto" && (
-                            <>
-                                <div>
-                                    <label className="block text-xs text-slate-400 mb-1.5">Percentuale (%)</label>
+                        </div>
+
+                        {/* Parametri compenso */}
+                        <div className="grid grid-cols-2 gap-4">
+                            {form.modelloCompenso === "percentuale" && (
+                                <div className="col-span-2">
+                                    <label className="block text-xs text-slate-400 mb-1.5">Percentuale (%) *</label>
                                     <input type="number" step="0.01" min="0" max="100"
-                                        value={form.percentualeMista} onChange={e => setForm(f => ({ ...f, percentualeMista: e.target.value }))}
+                                        value={form.percentuale} onChange={e => setForm(f => ({ ...f, percentuale: e.target.value }))}
                                         className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
                                         style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }} />
                                 </div>
-                                <div>
-                                    <label className="block text-xs text-slate-400 mb-1.5">Affitto (€)</label>
+                            )}
+                            {form.modelloCompenso === "affitto_stanza" && (
+                                <div className="col-span-2">
+                                    <label className="block text-xs text-slate-400 mb-1.5">Affitto Fisso Mensile (€) *</label>
                                     <input type="number" step="0.01" min="0"
-                                        value={form.affittoMisto} onChange={e => setForm(f => ({ ...f, affittoMisto: e.target.value }))}
+                                        value={form.affittoFisso} onChange={e => setForm(f => ({ ...f, affittoFisso: e.target.value }))}
                                         className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
                                         style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }} />
                                 </div>
-                            </>
-                        )}
-                    </div>
-
-                    <div className="col-span-2">
-                        <label className="block text-xs text-slate-400 mb-1.5">Note</label>
-                        <textarea value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))}
-                            rows={2}
-                            className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none resize-none"
-                            style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }}
-                        />
-                    </div>
-
-                    {error && (
-                        <div className="p-3 rounded-xl text-sm text-red-400" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
-                            {error}
+                            )}
+                            {form.modelloCompenso === "misto" && (
+                                <>
+                                    <div>
+                                        <label className="block text-xs text-slate-400 mb-1.5">Percentuale (%)</label>
+                                        <input type="number" step="0.01" min="0" max="100"
+                                            value={form.percentualeMista} onChange={e => setForm(f => ({ ...f, percentualeMista: e.target.value }))}
+                                            className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
+                                            style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }} />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-slate-400 mb-1.5">Affitto (€)</label>
+                                        <input type="number" step="0.01" min="0"
+                                            value={form.affittoMisto} onChange={e => setForm(f => ({ ...f, affittoMisto: e.target.value }))}
+                                            className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
+                                            style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }} />
+                                    </div>
+                                </>
+                            )}
                         </div>
-                    )}
 
-                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-800/50">
-                        <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl text-sm text-slate-400 hover:text-white transition-colors">
-                            Annulla
-                        </button>
-                        <button type="submit" disabled={loading}
-                            className="px-6 py-2 rounded-xl text-sm font-medium text-white transition-all active:scale-95 shadow-lg shadow-indigo-500/20"
-                            style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
-                            {loading ? "Salvataggio..." : "Salva Medico"}
-                        </button>
-                    </div>
-                </form>
+                        <div className="col-span-2">
+                            <label className="block text-xs text-slate-400 mb-1.5">Note</label>
+                            <textarea value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))}
+                                rows={2}
+                                className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none resize-none"
+                                style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }}
+                            />
+                        </div>
+
+                        {error && (
+                            <div className="p-3 rounded-xl text-sm text-red-400" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="flex justify-end gap-3 pt-4 border-t border-slate-800/50">
+                            <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl text-sm text-slate-400 hover:text-white transition-colors">
+                                Annulla
+                            </button>
+                            <button type="submit" disabled={loading}
+                                className="px-6 py-2 rounded-xl text-sm font-medium text-white transition-all active:scale-95 shadow-lg shadow-indigo-500/20"
+                                style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
+                                {loading ? "Salvataggio..." : "Salva Medico"}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );

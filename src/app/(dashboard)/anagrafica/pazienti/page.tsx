@@ -185,10 +185,23 @@ function NuovoPazienteModal({ onClose, onSave }: { onClose: () => void; onSave: 
     const [form, setForm] = useState({
         codiceFiscale: "", nome: "", cognome: "", dataNascita: "",
         sesso: "", telefono: "", email: "", indirizzo: "",
-        cap: "", citta: "", provincia: "", note: ""
+        cap: "", citta: "", provincia: "", note: "",
+        assicurazioneId: "", aziendaId: ""
     });
+    const [assicurazioni, setAssicurazioni] = useState<any[]>([]);
+    const [aziende, setAziende] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+    useEffect(() => {
+        Promise.all([
+            fetch("/api/anagrafica/assicurazioni").then(r => r.json()),
+            fetch("/api/anagrafica/aziende").then(r => r.json())
+        ]).then(([ass, az]) => {
+            setAssicurazioni(ass.data ?? []);
+            setAziende(az.data ?? []);
+        });
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -198,7 +211,12 @@ function NuovoPazienteModal({ onClose, onSave }: { onClose: () => void; onSave: 
             const res = await fetch("/api/anagrafica/pazienti", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...form, sesso: form.sesso || null }),
+                body: JSON.stringify({
+                    ...form,
+                    sesso: form.sesso || null,
+                    assicurazioneId: form.assicurazioneId || null,
+                    aziendaId: form.aziendaId || null
+                }),
             });
             if (!res.ok) {
                 const errData = await res.json();
@@ -217,77 +235,106 @@ function NuovoPazienteModal({ onClose, onSave }: { onClose: () => void; onSave: 
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
-            <div className="w-full max-w-2xl rounded-2xl p-6 animate-fade-in overflow-y-auto max-h-[90vh]"
-                style={{ background: "#1a1d2e", border: "1px solid rgba(99,102,241,0.2)" }}>
-                <h2 className="text-lg font-semibold text-white mb-5">Nuovo Paziente</h2>
-                <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-                    {[
-                        { label: "Codice Fiscale *", key: "codiceFiscale", col: 2 },
-                        { label: "Nome *", key: "nome" },
-                        { label: "Cognome *", key: "cognome" },
-                        { label: "Data di Nascita", key: "dataNascita", type: "date" },
-                        { label: "Telefono", key: "telefono" },
-                        { label: "Email", key: "email", type: "email", col: 2 },
-                        { label: "Indirizzo", key: "indirizzo", col: 2 },
-                        { label: "CAP", key: "cap" },
-                        { label: "Città", key: "citta" },
-                        { label: "Provincia", key: "provincia" },
-                    ].map(({ label, key, type = "text", col }) => (
-                        <div key={key} className={col === 2 ? "col-span-2" : ""}>
-                            <label className="block text-xs text-slate-400 mb-1.5">{label}</label>
-                            <input
-                                type={type}
-                                value={(form as any)[key]}
-                                onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                                required={label.endsWith("*")}
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm p-4" onClick={onClose}>
+            <div className="flex min-h-full items-center justify-center font-inter" onClick={e => e.stopPropagation()}>
+                <div className="w-full max-w-2xl rounded-3xl p-6 sm:p-8 animate-fade-in"
+                    style={{ background: "#1a1d2e", border: "1px solid rgba(99,102,241,0.2)", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-xl font-bold text-white">Nuovo Paziente</h2>
+                        <button onClick={onClose} className="p-2 rounded-full hover:bg-white/5 text-slate-400 transition-colors">
+                            <Plus className="w-5 h-5 rotate-45" />
+                        </button>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                        {[
+                            { label: "Codice Fiscale *", key: "codiceFiscale", col: 2 },
+                            { label: "Nome *", key: "nome" },
+                            { label: "Cognome *", key: "cognome" },
+                            { label: "Data di Nascita", key: "dataNascita", type: "date" },
+                            { label: "Telefono", key: "telefono" },
+                            { label: "Email", key: "email", type: "email", col: 2 },
+                            { label: "Indirizzo", key: "indirizzo", col: 2 },
+                            { label: "CAP", key: "cap" },
+                            { label: "Città", key: "citta" },
+                            { label: "Provincia", key: "provincia" },
+                        ].map(({ label, key, type = "text", col }) => (
+                            <div key={key} className={col === 2 ? "col-span-2" : ""}>
+                                <label className="block text-xs text-slate-400 mb-1.5">{label}</label>
+                                <input
+                                    type={type}
+                                    value={(form as any)[key]}
+                                    onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+                                    required={label.endsWith("*")}
+                                    className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
+                                    style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }}
+                                />
+                            </div>
+                        ))}
+
+                        <div>
+                            <label className="block text-xs text-slate-400 mb-1.5">Sesso</label>
+                            <select value={form.sesso} onChange={e => setForm(f => ({ ...f, sesso: e.target.value }))}
                                 className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
+                                style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }}>
+                                <option value="">Non specificato</option>
+                                <option value="M">Maschile</option>
+                                <option value="F">Femminile</option>
+                                <option value="Altro">Altro</option>
+                            </select>
+                        </div>
+
+                        <div className="col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs text-slate-400 mb-1.5">Assicurazione</label>
+                                <select value={form.assicurazioneId} onChange={e => setForm(f => ({ ...f, assicurazioneId: e.target.value }))}
+                                    className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
+                                    style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }}>
+                                    <option value="">Nessuna</option>
+                                    {assicurazioni.map(a => <option key={a.id} value={a.id}>{a.ragioneSociale}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-xs text-slate-400 mb-1.5">Azienda Conv.</label>
+                                <select value={form.aziendaId} onChange={e => setForm(f => ({ ...f, aziendaId: e.target.value }))}
+                                    className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
+                                    style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }}>
+                                    <option value="">Nessuna</option>
+                                    {aziende.map(a => <option key={a.id} value={a.id}>{a.ragioneSociale}</option>)}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="col-span-2">
+                            <label className="block text-xs text-slate-400 mb-1.5">Note</label>
+                            <textarea value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))}
+                                rows={2}
+                                className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none resize-none"
                                 style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }}
                             />
                         </div>
-                    ))}
 
-                    <div>
-                        <label className="block text-xs text-slate-400 mb-1.5">Sesso</label>
-                        <select value={form.sesso} onChange={e => setForm(f => ({ ...f, sesso: e.target.value }))}
-                            className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
-                            style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }}>
-                            <option value="">Non specificato</option>
-                            <option value="M">Maschile</option>
-                            <option value="F">Femminile</option>
-                            <option value="Altro">Altro</option>
-                        </select>
-                    </div>
+                        {error && (
+                            <div className="col-span-2 p-3 rounded-xl text-sm text-red-400"
+                                style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                                {error}
+                            </div>
+                        )}
 
-                    <div className="col-span-2">
-                        <label className="block text-xs text-slate-400 mb-1.5">Note</label>
-                        <textarea value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))}
-                            rows={2}
-                            className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none resize-none"
-                            style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }}
-                        />
-                    </div>
-
-                    {error && (
-                        <div className="col-span-2 p-3 rounded-xl text-sm text-red-400"
-                            style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
-                            {error}
+                        <div className="col-span-2 flex justify-end gap-3 pt-2">
+                            <button type="button" onClick={onClose}
+                                className="px-4 py-2 rounded-xl text-sm text-slate-400 hover:text-white transition-colors">
+                                Annulla
+                            </button>
+                            <button type="submit" disabled={loading}
+                                className="px-6 py-2 rounded-xl text-sm font-medium text-white transition-all"
+                                style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
+                                {loading ? "Salvataggio..." : "Salva Paziente"}
+                            </button>
                         </div>
-                    )}
-
-                    <div className="col-span-2 flex justify-end gap-3 pt-2">
-                        <button type="button" onClick={onClose}
-                            className="px-4 py-2 rounded-xl text-sm text-slate-400 hover:text-white transition-colors">
-                            Annulla
-                        </button>
-                        <button type="submit" disabled={loading}
-                            className="px-6 py-2 rounded-xl text-sm font-medium text-white transition-all"
-                            style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
-                            {loading ? "Salvataggio..." : "Salva Paziente"}
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     );
