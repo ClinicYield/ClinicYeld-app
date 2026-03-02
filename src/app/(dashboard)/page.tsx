@@ -12,6 +12,7 @@ import {
     Tooltip, ResponsiveContainer, Legend
 } from "recharts";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 
 interface DashboardData {
@@ -251,15 +252,15 @@ export default function DashboardPage() {
                             { label: "Registra Pagamento", href: "/incassi", color: "#3b82f6", bg: "#eff6ff" },
                             { label: "Calcola Compensi", href: "/compensi", color: "#f59e0b", bg: "#fffbeb" },
                         ].map((action) => (
-                            <a key={action.label} href={action.href}
-                                className="flex items-center justify-between px-5 py-4 rounded-2xl transition-all hover:scale-[1.02] shadow-sm hover:shadow-md"
+                            <Link key={action.label} href={action.href}
+                                className="flex items-center justify-between px-5 py-4 rounded-2xl transition-all hover:scale-[1.02] shadow-sm hover:shadow-md active:scale-95"
                                 style={{
                                     background: action.bg,
                                     border: `1px solid ${action.color}20`,
                                 }}>
                                 <span className="text-sm font-bold" style={{ color: action.color }}>{action.label}</span>
                                 <ArrowUpRight className="w-5 h-5" style={{ color: action.color }} />
-                            </a>
+                            </Link>
                         ))}
                     </div>
                 </div>

@@ -90,9 +90,15 @@ export default function NuovaPrestazioneErogata() {
             const res = await fetch("/api/prestazioni-erogate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form),
+                body: JSON.stringify({
+                    ...form,
+                    stanzaId: form.stanzaId || null,
+                }),
             });
-            if (!res.ok) throw new Error("Errore nel salvataggio");
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error?.[0]?.message || "Errore nel salvataggio");
+            }
             router.push("/prestazioni-erogate");
         } catch (e: any) {
             setError(e.message);

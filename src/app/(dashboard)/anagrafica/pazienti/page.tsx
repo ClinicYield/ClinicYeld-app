@@ -201,8 +201,12 @@ function NuovoPazienteModal({ onClose, onSave }: { onClose: () => void; onSave: 
                 body: JSON.stringify({ ...form, sesso: form.sesso || null }),
             });
             if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.error?.[0]?.message ?? "Errore nel salvataggio");
+                const errData = await res.json();
+                // If it's a Zod error array, take the first one
+                const message = Array.isArray(errData.error)
+                    ? errData.error[0]?.message
+                    : (errData.error || "Errore nel salvataggio");
+                throw new Error(message);
             }
             onSave();
         } catch (e: any) {

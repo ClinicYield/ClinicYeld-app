@@ -149,13 +149,20 @@ export default function MediciPage() {
 function NuovoMedicoModal({ onClose, onSave }: { onClose: () => void; onSave: () => void }) {
     const [form, setForm] = useState({
         codiceFiscale: "", partitaIva: "", nome: "", cognome: "",
-        telefono: "", email: "", iban: "",
+        telefono: "", email: "", iban: "", specialitaId: "",
         modelloCompenso: "percentuale",
         percentuale: "", affittoFisso: "", percentualeMista: "", affittoMisto: "",
         note: ""
     });
+    const [specialta, setSpecialta] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+    useEffect(() => {
+        fetch("/api/anagrafica/specialita")
+            .then(r => r.json())
+            .then(j => setSpecialta(j.data ?? []));
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -165,9 +172,15 @@ function NuovoMedicoModal({ onClose, onSave }: { onClose: () => void; onSave: ()
             const res = await fetch("/api/anagrafica/medici", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form),
+                body: JSON.stringify({
+                    ...form,
+                    specialitaId: form.specialitaId || null,
+                }),
             });
-            if (!res.ok) throw new Error("Errore nel salvataggio");
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error?.[0]?.message || "Errore nel salvataggio");
+            }
             onSave();
         } catch (e: any) {
             setError(e.message);
@@ -182,7 +195,7 @@ function NuovoMedicoModal({ onClose, onSave }: { onClose: () => void; onSave: ()
                 style={{ background: "#1a1d2e", border: "1px solid rgba(99,102,241,0.2)" }}>
                 <h2 className="text-lg font-semibold text-white mb-5">Nuovo Medico</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
                         {[
                             { label: "Codice Fiscale *", key: "codiceFiscale" },
                             { label: "Partita IVA", key: "partitaIva" },
@@ -192,8 +205,8 @@ function NuovoMedicoModal({ onClose, onSave }: { onClose: () => void; onSave: ()
                             { label: "Email", key: "email", type: "email" },
                             { label: "IBAN", key: "iban", col: 2 },
                         ].map(({ label, key, type = "text", col }) => (
-                            <div key={key} className={col === 2 ? "col-span-2" : ""}>
-                                <label className="block text-xs text-slate-400 mb-1.5">{label}</label>
+                            <div key={key} className={col === 2 ? "sm:col-span-2" : ""}>
+                                <label className="block text-xs text-slate-400 mb-1">{label}</label>
                                 <input type={type} value={(form as any)[key]}
                                     onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
                                     required={label.endsWith("*")}
@@ -201,6 +214,15 @@ function NuovoMedicoModal({ onClose, onSave }: { onClose: () => void; onSave: ()
                                     style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }} />
                             </div>
                         ))}
+                        <div className="sm:col-span-2">
+                            <label className="block text-xs text-slate-400 mb-1">Specializzazione</label>
+                            <select value={form.specialitaId} onChange={e => setForm(f => ({ ...f, specialitaId: e.target.value }))}
+                                className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none"
+                                style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }}>
+                                <option value="">Nessuna</option>
+                                {specialta.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
+                            </select>
+                        </div>
                     </div>
 
                     {/* Modello compenso */}
@@ -266,18 +288,27 @@ function NuovoMedicoModal({ onClose, onSave }: { onClose: () => void; onSave: ()
                         )}
                     </div>
 
+                    <div className="col-span-2">
+                        <label className="block text-xs text-slate-400 mb-1.5">Note</label>
+                        <textarea value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))}
+                            rows={2}
+                            className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none resize-none"
+                            style={{ background: "rgba(15,17,23,0.8)", border: "1px solid rgba(99,102,241,0.2)" }}
+                        />
+                    </div>
+
                     {error && (
                         <div className="p-3 rounded-xl text-sm text-red-400" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
                             {error}
                         </div>
                     )}
 
-                    <div className="flex justify-end gap-3 pt-2">
+                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-800/50">
                         <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl text-sm text-slate-400 hover:text-white transition-colors">
                             Annulla
                         </button>
                         <button type="submit" disabled={loading}
-                            className="px-6 py-2 rounded-xl text-sm font-medium text-white"
+                            className="px-6 py-2 rounded-xl text-sm font-medium text-white transition-all active:scale-95 shadow-lg shadow-indigo-500/20"
                             style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
                             {loading ? "Salvataggio..." : "Salva Medico"}
                         </button>
