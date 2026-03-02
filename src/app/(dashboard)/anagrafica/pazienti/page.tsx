@@ -195,14 +195,17 @@ function NuovoPazienteModal({ onClose, onSave }: { onClose: () => void; onSave: 
     const [showAssicurazioneForm, setShowAssicurazioneForm] = useState(false);
     const [showAziendaForm, setShowAziendaForm] = useState(false);
 
-    const refreshData = () => {
-        Promise.all([
-            fetch("/api/anagrafica/assicurazioni").then(r => r.json()),
-            fetch("/api/anagrafica/aziende").then(r => r.json())
-        ]).then(([ass, az]) => {
+    const refreshData = async () => {
+        try {
+            const [ass, az] = await Promise.all([
+                fetch("/api/anagrafica/assicurazioni").then(r => r.json()),
+                fetch("/api/anagrafica/aziende").then(r => r.json())
+            ]);
             setAssicurazioni(ass.data ?? []);
             setAziende(az.data ?? []);
-        });
+        } catch (e) {
+            console.error("Error refreshing data:", e);
+        }
     };
 
     useEffect(() => {
@@ -246,7 +249,7 @@ function NuovoPazienteModal({ onClose, onSave }: { onClose: () => void; onSave: 
                 <div className="w-full max-w-2xl rounded-3xl p-6 sm:p-8 animate-fade-in"
                     style={{ background: "#1a1d2e", border: "1px solid rgba(99,102,241,0.2)", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}>
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-xl font-bold text-white">Nuovo Paziente</h2>
+                        <h2 className="text-xl font-bold text-white uppercase tracking-tight">Nuovo Paziente</h2>
                         <button onClick={onClose} className="p-2 rounded-full hover:bg-white/5 text-slate-400 transition-colors">
                             <Plus className="w-5 h-5 rotate-45" />
                         </button>
@@ -291,35 +294,41 @@ function NuovoPazienteModal({ onClose, onSave }: { onClose: () => void; onSave: 
                             </select>
                         </div>
 
-                        <div className="col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 bg-slate-900/40 p-5 rounded-2xl border border-white/5 my-2">
+                        <div className="col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 bg-indigo-500/5 p-5 rounded-3xl border border-indigo-500/20 my-4">
                             <div>
-                                <div className="flex items-center justify-between mb-2">
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Assicurazione</label>
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex flex-col">
+                                        <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider">Assicurazione</label>
+                                        <span className="text-[9px] text-slate-500 italic">Seleziona o crea nuova</span>
+                                    </div>
                                     <button type="button" onClick={() => setShowAssicurazioneForm(true)}
-                                        className="text-[10px] bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded-lg border border-indigo-500/20 transition-all font-bold uppercase tracking-wide">
-                                        + Crea Nuova
+                                        className="text-[10px] bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl transition-all font-bold uppercase tracking-wider shadow-lg shadow-indigo-600/20 active:scale-95">
+                                        + NUOVA
                                     </button>
                                 </div>
                                 <select value={form.assicurazioneId} onChange={e => setForm(f => ({ ...f, assicurazioneId: e.target.value }))}
-                                    className="w-full px-3 py-2.5 rounded-xl text-sm text-white outline-none"
-                                    style={{ background: "#1a1d2e", border: "1px solid rgba(99,102,241,0.2)" }}>
-                                    <option value="">Nessuna assicurazione</option>
-                                    {assicurazioni.map(a => <option key={a.id} value={a.id}>{a.ragioneSociale}</option>)}
+                                    className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none focus:ring-2 ring-indigo-500/30 transition-all font-inter"
+                                    style={{ background: "#0f172a", border: "1px solid rgba(99,102,241,0.3)" }}>
+                                    <option value="">Nessuna (Paziente Privato)</option>
+                                    {assicurazioni.map(a => <option key={a.id} value={a.id}>{a.ragioneSociale.toUpperCase()}</option>)}
                                 </select>
                             </div>
                             <div>
-                                <div className="flex items-center justify-between mb-2">
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Azienda Conv.</label>
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex flex-col">
+                                        <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider">Azienda Conv.</label>
+                                        <span className="text-[9px] text-slate-500 italic">Seleziona o crea nuova</span>
+                                    </div>
                                     <button type="button" onClick={() => setShowAziendaForm(true)}
-                                        className="text-[10px] bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded-lg border border-indigo-500/20 transition-all font-bold uppercase tracking-wide">
-                                        + Crea Nuova
+                                        className="text-[10px] bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl transition-all font-bold uppercase tracking-wider shadow-lg shadow-indigo-600/20 active:scale-95">
+                                        + NUOVA
                                     </button>
                                 </div>
                                 <select value={form.aziendaId} onChange={e => setForm(f => ({ ...f, aziendaId: e.target.value }))}
-                                    className="w-full px-3 py-2.5 rounded-xl text-sm text-white outline-none"
-                                    style={{ background: "#1a1d2e", border: "1px solid rgba(99,102,241,0.2)" }}>
-                                    <option value="">Nessuna azienda</option>
-                                    {aziende.map(a => <option key={a.id} value={a.id}>{a.ragioneSociale}</option>)}
+                                    className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none focus:ring-2 ring-indigo-500/30 transition-all font-inter"
+                                    style={{ background: "#0f172a", border: "1px solid rgba(99,102,241,0.3)" }}>
+                                    <option value="">Nessuna convenzione</option>
+                                    {aziende.map(a => <option key={a.id} value={a.id}>{a.ragioneSociale.toUpperCase()}</option>)}
                                 </select>
                             </div>
                         </div>
@@ -355,30 +364,35 @@ function NuovoPazienteModal({ onClose, onSave }: { onClose: () => void; onSave: 
                 </div>
             </div>
 
+            {/* Sub-modali spostati fuori dal container del form per evitare conflitti di click */}
             {showAssicurazioneForm && (
-                <QuickAddModal
-                    title="Nuova Assicurazione"
-                    onClose={() => setShowAssicurazioneForm(false)}
-                    onSave={(id) => {
-                        refreshData();
-                        setForm(f => ({ ...f, assicurazioneId: id }));
-                        setShowAssicurazioneForm(false);
-                    }}
-                    api="/api/anagrafica/assicurazioni"
-                />
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md" onClick={(e) => e.stopPropagation()}>
+                    <QuickAddModal
+                        title="Nuova Assicurazione"
+                        onClose={() => setShowAssicurazioneForm(false)}
+                        onSave={(id) => {
+                            refreshData();
+                            setForm(f => ({ ...f, assicurazioneId: id }));
+                            setShowAssicurazioneForm(false);
+                        }}
+                        api="/api/anagrafica/assicurazioni"
+                    />
+                </div>
             )}
 
             {showAziendaForm && (
-                <QuickAddModal
-                    title="Nuova Azienda"
-                    onClose={() => setShowAziendaForm(false)}
-                    onSave={(id) => {
-                        refreshData();
-                        setForm(f => ({ ...f, aziendaId: id }));
-                        setShowAziendaForm(false);
-                    }}
-                    api="/api/anagrafica/aziende"
-                />
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md" onClick={(e) => e.stopPropagation()}>
+                    <QuickAddModal
+                        title="Nuova Azienda"
+                        onClose={() => setShowAziendaForm(false)}
+                        onSave={(id) => {
+                            refreshData();
+                            setForm(f => ({ ...f, aziendaId: id }));
+                            setShowAziendaForm(false);
+                        }}
+                        api="/api/anagrafica/aziende"
+                    />
+                </div>
             )}
         </div>
     );
@@ -392,6 +406,7 @@ function QuickAddModal({ title, onClose, onSave, api }: { title: string; onClose
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
+        e.stopPropagation(); // Evita che il click arrivi al modale sotto
         setLoading(true);
         setError("");
         try {
@@ -401,7 +416,10 @@ function QuickAddModal({ title, onClose, onSave, api }: { title: string; onClose
                 body: JSON.stringify({ ragioneSociale: name, partitaIva: piva }),
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(Array.isArray(data.error) ? data.error[0].message : data.error);
+            if (!res.ok) {
+                const msg = Array.isArray(data.error) ? data.error[0].message : (data.error || "Errore");
+                throw new Error(msg);
+            }
             onSave(data.id);
         } catch (e: any) {
             setError(e.message);
@@ -411,29 +429,40 @@ function QuickAddModal({ title, onClose, onSave, api }: { title: string; onClose
     };
 
     return (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-            <div className="w-full max-w-sm rounded-2xl p-6" style={{ background: "#1a1d2e", border: "1px solid rgba(99,102,241,0.3)" }}>
-                <h3 className="text-lg font-bold text-white mb-4">{title}</h3>
-                <form onSubmit={handleSave} className="space-y-4">
-                    <div>
-                        <label className="block text-xs text-slate-400 mb-1">Ragione Sociale *</label>
-                        <input type="text" value={name} onChange={e => setName(e.target.value)} required
-                            className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none bg-slate-900/50 border border-white/10" />
+        <div className="w-full max-w-sm rounded-3xl p-8 animate-scale-in shadow-2xl"
+            style={{ background: "#1a1d2e", border: "1px solid rgba(99,102,241,0.4)" }}
+            onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <Plus className="w-5 h-5 text-indigo-400" />
+                {title}
+            </h3>
+            <form onSubmit={handleSave} className="space-y-5">
+                <div>
+                    <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">Ragione Sociale *</label>
+                    <input type="text" value={name} onChange={e => setName(e.target.value)} required placeholder="Inserisci nome..."
+                        className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none bg-slate-900/80 border border-white/10 focus:border-indigo-500/50 transition-all font-inter" />
+                </div>
+                <div>
+                    <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">Partita IVA * (11 cifre)</label>
+                    <input type="text" value={piva} onChange={e => setPiva(e.target.value)} required maxLength={11} minLength={11} placeholder="01234567890"
+                        className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none bg-slate-900/80 border border-white/10 focus:border-indigo-500/50 transition-all font-inter" />
+                </div>
+                {error && (
+                    <div className="p-3 rounded-xl text-xs text-red-400 bg-red-500/10 border border-red-500/20">
+                        {error}
                     </div>
-                    <div>
-                        <label className="block text-xs text-slate-400 mb-1">Partita IVA * (11 cifre)</label>
-                        <input type="text" value={piva} onChange={e => setPiva(e.target.value)} required
-                            className="w-full px-3 py-2 rounded-xl text-sm text-white outline-none bg-slate-900/50 border border-white/10" />
-                    </div>
-                    {error && <p className="text-xs text-red-400">{error}</p>}
-                    <div className="flex justify-end gap-2 pt-2">
-                        <button type="button" onClick={onClose} className="text-xs text-slate-400 px-3 py-2">Annulla</button>
-                        <button type="submit" disabled={loading} className="bg-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-lg disabled:opacity-50">
-                            {loading ? "..." : "Salva"}
-                        </button>
-                    </div>
-                </form>
-            </div>
+                )}
+                <div className="flex justify-end gap-3 pt-4">
+                    <button type="button" onClick={onClose}
+                        className="text-sm font-medium text-slate-400 px-4 py-2 hover:text-white transition-colors">
+                        Annulla
+                    </button>
+                    <button type="submit" disabled={loading}
+                        className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold px-6 py-2.5 rounded-xl disabled:opacity-50 transition-all shadow-lg shadow-indigo-500/20">
+                        {loading ? "Salvataggio..." : "Salva e Seleziona"}
+                    </button>
+                </div>
+            </form>
         </div>
     );
 }
